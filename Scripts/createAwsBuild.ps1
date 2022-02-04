@@ -1,0 +1,1 @@
+aws gamelift upload-build --name PongServer --build-version "0.3" --build-root "$PSScriptRoot/../Build/Server/StandaloneLinux64" --operating-system AMAZON_LINUX --region us-east-1

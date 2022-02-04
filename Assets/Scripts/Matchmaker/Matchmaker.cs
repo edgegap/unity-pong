@@ -1,22 +1,16 @@
 using Newtonsoft.Json;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 public enum Mode { casual, rank };
 
 public class MatchmakerConfiguration
 {
-    public string MatchmakerUrl => "https://supermatchmaker-a979815d099f47.edgegap.net";
-    public string ApiToken => "ABCDEF12345";
+    public string MatchmakerUrl => "http://10.10.10.142:8001";
 }
 
 public class Matchmaker
@@ -36,21 +30,12 @@ public class Matchmaker
         // Setup the post data
         var dataObject = new
         {
-            edgegap_profile_id = "pong",
-            matchmaking_data = new
-            {
-                selector_data = new
-                {
-                    mode = mode.ToString(),
-                }
-            }
-
+            mode = mode.ToString(),
         };
         string json = JsonConvert.SerializeObject(dataObject);
         StringContent postData = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
         // Make the HTTP POST
-        MatchmakerUtility.HttpClient.DefaultRequestHeaders.Add("Authorization", _configuration.ApiToken);
         HttpResponseMessage response = await MatchmakerUtility.HttpClient.PostAsync($"{_configuration.MatchmakerUrl}/v1/tickets", postData).ConfigureAwait(false);
         TicketData? parsedData = null;
 

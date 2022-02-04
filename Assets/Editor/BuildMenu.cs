@@ -22,6 +22,12 @@ public class BuildMenu : MonoBehaviour
         _builder.BuildClient(_buildConfiguration, BuildTarget.StandaloneWindows64, BuildOptions.None);
     }
 
+    [MenuItem("Build/Client/OSX")]
+    public static void ClientOSX()
+    {
+        _builder.BuildClient(_buildConfiguration, BuildTarget.StandaloneOSX, BuildOptions.None);
+    }
+
     [MenuItem("Build/Server/Win64")]
     public static void ServerWin64()
     {

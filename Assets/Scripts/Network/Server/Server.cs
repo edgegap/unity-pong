@@ -121,14 +121,14 @@ public class PongGame
     }
 }
 
-public class Server : MonoBehaviour
+public class Server
 {
     private TcpListener _tcpListener;
     private int _port = 6969;
     private IPAddress _ip = IPAddress.Parse("0.0.0.0");
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
     {
         MessageFactory messageFactory = new MessageFactory();
         System.Random r = new System.Random();
@@ -179,10 +179,5 @@ public class Server : MonoBehaviour
 
         Debug.Log($"Game is over server will close");
         Application.Quit();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
     }
 }
