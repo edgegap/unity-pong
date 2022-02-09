@@ -2,55 +2,111 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+struct Position
+{
+    public float OldPosition { get; }
+    public float CurrentPosition { get; }
+    public float Mouvement { get; }
+
+    public Position(float oldPosition, float currentPosition, float mouvement)
+    {
+        OldPosition = oldPosition;
+        CurrentPosition = currentPosition;
+        Mouvement = mouvement;
+    }
+
+    public Position SetCurrent(float newCurrent) => new Position(OldPosition, newCurrent, Mouvement);
+    public Position SetOld(float newOld) => new Position(newOld, CurrentPosition, Mouvement);
+    public Position SetMouvement(float newMouvement) => new Position(OldPosition, CurrentPosition, newMouvement);
+}
+
 public class PongGame
 {
+    public event Action OnGameOver;
+
     private PongClient _p1;
     private PongClient _p2;
+    private IRawMessageInterpreter _interpreter;
     private Dictionary<PongClient, Position> _position;
 
     private MessageFactory _factory;
     private float _speed = 6.11f;
 
-    public PongGame(PongClient p1, PongClient p2, MessageFactory factory)
+    public PongGame(MessageFactory factory, IRawMessageInterpreter interpreter)
     {
-        _p1 = p1;
-        _p2 = p2;
         _factory = factory;
-        _position = new Dictionary<PongClient, Position>()
-        {
-            { _p1, new Position()},
-            { _p2, new Position()},
-        };
-        p1.OnMessageReceived += HandleMessage;
-        p2.OnMessageReceived += HandleMessage;
+        _position = new Dictionary<PongClient, Position>(2);
+        _interpreter = interpreter;
 
+        // Handle interpreted messages
+        _interpreter.OnMoveMessage += HandleMoveMessage;
+        _interpreter.OnUnkownMessage += HandleUnkownMessage;
+
+    }
+
+    public void AddPlayer(PongClient player)
+    {
+        if (_p1 == null)
+        {
+            _p1 = player;
+        }
+        else if (_p2 == null)
+        {
+            _p2 = player;
+        }
+        else
+        {
+            throw new InvalidOperationException("Game is full");
+        }
+
+        // Handle players message
+        player.OnMessageReceived += _interpreter.Parse;
+
+        // Handle connection lost
+        player.OnConnectionLost += HandleConenctionLost;
+
+        _position[player] = new Position();
+    }
+
+    public void Start()
+    {
+        // Sending position data to players each X ms
         var timer = new System.Threading.Timer((e) =>
         {
             SendPositions();
-        }, null, 1000, 5);
+        }, null, 0, 1);
     }
 
-    private void HandleMessage(PongClient sender, RawPongMessage msg)
+
+    /// <summary>
+    /// Handle move message from players. This will update their mouvement based on the message
+    /// </summary>
+    private void HandleConenctionLost(PongClient sender)
     {
-
-        Debug.Log($"Handle {msg.Command} {String.Join(",", msg.Args)} from player #{sender.ID}");
-
-        // Change switch for better design
-        switch (msg.Command)
-        {
-            case "MOVE":
-                int mouvement = Convert.ToInt32(msg.Args[1].Trim());
-                UpdatePosition(sender, mouvement);
-                break;
-        }
+        OnGameOver?.Invoke();
     }
 
-    private void UpdatePosition(PongClient sender, int mouvement)
+    /// <summary>
+    /// Handle move message from players. This will update their mouvement based on the message
+    /// </summary>
+    private void HandleMoveMessage(PongClient sender, MovePongMessage msg)
     {
+        Debug.Log($"Handle ({msg.GetMessage()}) from player #{sender.ID}");
         Position p = _position[sender];
-        _position[sender] = p.SetMouvement(mouvement);
+        _position[sender] = p.SetMouvement((int)msg.Mouvement);
     }
 
+    /// <summary>
+    /// Handle unkown message from players. This will log the message
+    /// </summary>
+    private void HandleUnkownMessage(PongClient sender, RawPongMessage msg)
+    {
+        Debug.Log($"Received unkown message ({msg.ToString()}) from player #{sender.ID}");
+    }
+
+    /// <summary>
+    /// Update the players position based on their mouvement and current position
+    /// </summary>
     public void UpdatePlayersPosition()
     {
         UpdatePlayerPosition(_p1);
@@ -64,6 +120,9 @@ public class PongGame
         _position[player] = _position[player].SetCurrent(_position[player].CurrentPosition + delta * _speed);
     }
 
+    /// <summary>
+    /// Send each player's position to every players
+    /// </summary>
     private void SendPositions()
     {
         SendPosition(_p1);
@@ -73,6 +132,7 @@ public class PongGame
     private void SendPosition(PongClient player)
     {
         Position position = _position[player];
+
         if (Math.Abs(position.CurrentPosition - position.OldPosition) > 0.005)
         {
             _position[player] = position.SetOld(position.CurrentPosition);
@@ -80,23 +140,5 @@ public class PongGame
             _p1.SendMessage(msg);
             _p2.SendMessage(msg);
         }
-    }
-
-    struct Position
-    {
-        public float OldPosition { get; }
-        public float CurrentPosition { get; }
-        public int Mouvement { get; }
-
-        public Position(float oldPosition, float currentPosition, int mouvement)
-        {
-            OldPosition = oldPosition;
-            CurrentPosition = currentPosition;
-            Mouvement = mouvement;
-        }
-
-        public Position SetCurrent(float newCurrent) => new Position(OldPosition, newCurrent, Mouvement);
-        public Position SetOld(float newOld) => new Position(newOld, CurrentPosition, Mouvement);
-        public Position SetMouvement(int newMouvement) => new Position(OldPosition, CurrentPosition, newMouvement);
     }
 }

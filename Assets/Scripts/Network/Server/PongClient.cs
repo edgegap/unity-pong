@@ -8,11 +8,11 @@ using UnityEngine;
 public class PongClient
 {
     public event Action<PongClient, RawPongMessage> OnMessageReceived;
+    public event Action<PongClient> OnConnectionLost;
 
     private MessageFactory _factory;
     private int _id;
     private TcpClient _client;
-    private StreamWriter _writer;
 
     public int ID { get => _id; }
 
@@ -22,7 +22,6 @@ public class PongClient
         _id = id;
         _client = client;
         client.NoDelay = true;
-        _writer = new StreamWriter(_client.GetStream());
         Assign();
     }
 
@@ -48,35 +47,33 @@ public class PongClient
                 OnMessageReceived?.Invoke(this, RawPongMessage.Parse(data));
             }
         }
-        catch (Exception e)
+        catch
         {
-            Debug.LogError(e);
+            Close();
         }
-        Debug.Log($"Player #{_id} stop listening");
-
-
-        // Shutdown and end connection
-        _client.Close();
     }
 
     public void SendMessage(IPongMessage msg)
     {
-        string s = $"{msg.GetMessage()}\n";
-        Debug.Log($"Sending ({msg.GetMessage()}) to player #{_id}");
-        //_writer.WriteLine(s);
-        //_writer.Flush();
-        //_client.GetStream().Flush();
-        NetworkStream stream = _client.GetStream();
-        var bytesMsg = Encoding.ASCII.GetBytes(s);
-        stream.Write(bytesMsg, 0, bytesMsg.Length);
-        stream.Flush();
+        try
+        {
+            string s = $"{msg.GetMessage()}\n";
+            Debug.Log($"Sending ({msg.GetMessage()}) to player #{_id}");
+            NetworkStream stream = _client.GetStream();
+            var bytesMsg = Encoding.ASCII.GetBytes(s);
+            stream.Write(bytesMsg, 0, bytesMsg.Length);
+            stream.Flush();
+        }
+        catch
+        {
+            Close();
+        }
     }
 
     private void Assign()
     {
         IPongMessage msg = _factory.GetAssignMessage(_id);
-        _writer.WriteLine(msg.GetMessage());
-        _writer.Flush();
+        SendMessage(msg);
     }
 
     private string GetNextCommand()
@@ -84,14 +81,30 @@ public class PongClient
         StringBuilder sb = new StringBuilder();
         NetworkStream stream = _client.GetStream();
         bool commandCompleted = false;
+
         while (!commandCompleted)
         {
-            char c = (char)stream.ReadByte();
+            int i = stream.ReadByte();
+
+            if (i == -1)
+            {
+                throw new Exception("End of stream");
+            }
+            
+            char c = (char)i;
+
             sb.Append(c);
 
             commandCompleted = c == '\n';
         }
-        
+
         return sb.ToString();
+    }
+
+    private void Close()
+    {
+        Debug.Log($"Player #{_id} conneciton lost");
+        _client.Close();
+        OnConnectionLost?.Invoke(this);
     }
 }

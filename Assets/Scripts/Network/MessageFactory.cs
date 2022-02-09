@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MessageFactory
@@ -20,11 +21,6 @@ public class MessageFactory
     }
 }
 
-public interface IPongMessage
-{
-    string GetMessage();
-}
-
 public struct RawPongMessage
 {
     private static char[] _splitChar = new char[] { '|' };
@@ -39,12 +35,25 @@ public struct RawPongMessage
 
         return new RawPongMessage() { Command = cmd, Args = args };
     }
+
+    public override string ToString()
+    {
+        return $"{Command}|{string.Join("|", Args)}";
+    }
+}
+
+public interface IPongMessage
+{
+    string GetMessage();
 }
 
 public struct MovePongMessage : IPongMessage
 {
     private float _delta;
     private int _playerId;
+
+    public float Mouvement => _delta;
+    public int PlayerId => _playerId;
     public MovePongMessage(int playerId, float delta)
     {
         _delta = delta;
