@@ -1,29 +1,22 @@
 using Newtonsoft.Json;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
-public enum Mode { casual, rank };
-
-public class MatchmakerConfiguration
+public class ArbitriumMatchmakerConfiguration
 {
     public string MatchmakerUrl => "https://supermatchmaker-a979815d099f47.edgegap.net";
     public string ApiToken => "ABCDEF12345";
 }
 
-public class Matchmaker
+public class ArbitriumMatchmaker : IMatchmaker
 {
-    private MatchmakerConfiguration _configuration;
+    private ArbitriumMatchmakerConfiguration _configuration;
 
-    public Matchmaker(MatchmakerConfiguration configuration)
+    public ArbitriumMatchmaker(ArbitriumMatchmakerConfiguration configuration)
     {
         _configuration = configuration;
     }
@@ -141,40 +134,11 @@ public class Matchmaker
         [JsonProperty("data")]
         public T data { get; set; }
     }
-
-    public interface ITicket
-    {
-        string Id { get; }
-    }
-
-    public struct PendingTicket : ITicket
-    {
-        public string Id { get; private set; }
-        public PendingTicket(string id)
-        {
-            Id = id;
-        }
-    }
-
-    public struct ReadyTicket : ITicket
-    {
-        public string Id { get; private set; }
-        public string Ip { get; private set; }
-        public int Port { get; private set; }
-        public ReadyTicket(string id, string serverIp, int serverPort)
-        {
-            Id = id;
-            Ip = serverIp;
-            Port = serverPort;
-        }
-    }
-
-
 }
 
 
 /// <summary>
-/// I don't know why but if I put HttpClient in this class it's work, b ut not in matchmaker class. WTF?
+/// I don't know why but if I put HttpClient in this class it works, but not in matchmaker class. WTF?
 /// </summary>
 static class MatchmakerUtility
 {

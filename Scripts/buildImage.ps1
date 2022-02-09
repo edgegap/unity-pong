@@ -1,4 +1,8 @@
-$buildFolder = (Resolve-Path "$PSScriptRoot/../Build/Server/StandaloneLinux64")
+param (
+    [string]$version
+)
+
+. "$PSScriptRoot/variables.ps1" -tag $version
 
 if (-Not (Test-Path -Path $buildFolder)) {
     "Cannot find build direcotry ($buildFolder)";
@@ -33,9 +37,7 @@ xvfb-run --auto-servernum --server-args='-screen 0 640x480x24:32' /root/build/ed
 "@
 [System.IO.File]::WriteAllLines("$buildFolder/entrypoint.sh", $fileContent, $Utf8NoBomEncoding)
 
-$imageName = "harbor.edgegap.net/edgegap-experimental/unity-pong-server:0.1"
-
-docker build  -f $dockerfilePath -t $imageName $buildFolder
+docker build  -f $dockerfilePath -t "${imageName}:${imageTag}" $buildFolder
 
 if ($LASTEXITCODE -eq 1) {
     Exit $LASTEXITCODE

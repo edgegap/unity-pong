@@ -6,7 +6,7 @@ using UnityEngine;
 public class PongServerCommunicator : MonoBehaviour
 {
     public event Action<int> OnPlayerAssignment;
-    public event Action<int, float> OnMoveCommand;
+    public event Action<int, float> OnPositionChanged;
 
     [SerializeField]
     ServerCommunicator _com;
@@ -37,8 +37,8 @@ public class PongServerCommunicator : MonoBehaviour
             case "ASSIGN":
                 OnPlayerAssignment?.Invoke(Convert.ToInt32(pongMsg.Args[0]));
                 break;
-            case "MOVE":
-                OnMoveCommand?.Invoke(Convert.ToInt32(pongMsg.Args[0]),Convert.ToInt32(pongMsg.Args[1]));
+            case "POSITION":
+                OnPositionChanged?.Invoke(Convert.ToInt32(pongMsg.Args[0]), float.Parse(pongMsg.Args[1]));
                 break;
         }
     }

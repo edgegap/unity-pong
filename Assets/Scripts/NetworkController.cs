@@ -1,7 +1,4 @@
-using System.Net.Sockets;
-using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
 
 public class NetworkController : MonoBehaviour
 {
@@ -10,16 +7,19 @@ public class NetworkController : MonoBehaviour
     [SerializeField]
     PongServerCommunicator com;
 
+    float _position = 0;
+
     private int _playerId;
     // Start is called before the first frame update
     void Start()
     {
         com.OnPlayerAssignment += (id) => _playerId = (id % 2) + 1;
-        com.OnMoveCommand += (id, move) =>
+        com.OnPositionChanged += (id, pos) =>
         {
+            Debug.Log($"Handle position changed for player #{id} -> {pos}");
             if (id == _playerId)
             {
-                controller.Move(move);
+                _position = pos;
             }
         };
     }
@@ -27,5 +27,6 @@ public class NetworkController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        controller.SetPaddlePosition(_position);
     }
 }

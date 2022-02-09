@@ -13,6 +13,11 @@ public class MessageFactory
     {
         return new AssignPongMessage(id);
     }
+
+    public IPongMessage GetPaddlePositionMessage(int id, float position)
+    {
+        return new PaddlePositionMessage(id, position);
+    }
 }
 
 public interface IPongMessage
@@ -63,5 +68,21 @@ public struct AssignPongMessage : IPongMessage
     public string GetMessage()
     {
         return $"ASSIGN|{_id}";
+    }
+}
+
+public struct PaddlePositionMessage : IPongMessage
+{
+    private int _id;
+    private float _paddlePosition;
+    public PaddlePositionMessage(int playerId, float paddlePosition)
+    {
+        _id = playerId;
+        _paddlePosition = paddlePosition;
+    }
+
+    public string GetMessage()
+    {
+        return $"POSITION|{_id}|{_paddlePosition}";
     }
 }

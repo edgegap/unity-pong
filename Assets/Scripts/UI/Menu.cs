@@ -20,18 +20,25 @@ public class Menu : MonoBehaviour
     [SerializeField]
     Text WaitText;
 
-    private Matchmaker _matchmaker = new Matchmaker(new MatchmakerConfiguration());
-    private Matchmaker.PendingTicket _pendingTicket;
-    // Start is called before the first frame update
+    // If you want to change the matchmaker just change the factory here
+    private static IMatchmakerFactory _factory = new ArbitriumMatchmakerFactory(); 
+    private IMatchmaker _matchmaker = _factory.CreateMatchmaker();
+    private PendingTicket _pendingTicket;
+
     void Start()
     {
+        // Set game scree resolution
         Screen.SetResolution(1000, 700, false);
+
+        // Set handlers
         ConnectButton.GetComponentInChildren<Text>().text = "Connect";
         ConnectButton.onClick.AddListener(HandleClickConnect);
         FindMatchButton.onClick.AddListener(HandleFindMatch);
         CancelButton.onClick.AddListener(HandleCancel);
         CancelButton.enabled = false;
         FindMatchButton.enabled = true;
+
+        Application.runInBackground = true;
     }
 
     void HandleClickConnect()
@@ -42,7 +49,6 @@ public class Menu : MonoBehaviour
 
     async void HandleFindMatch()
     {
-        //Debug.Log((await MatchmakerUtility.CreateTicket()));
         CancelButton.enabled = true;
         FindMatchButton.enabled = false;
         WaitText.text = "Waiting for player";
@@ -51,7 +57,7 @@ public class Menu : MonoBehaviour
 
         try
         {
-            Matchmaker.ReadyTicket ticket = await _matchmaker.ResolveTicket(_pendingTicket, 30);
+            ReadyTicket ticket = await _matchmaker.ResolveTicket(_pendingTicket, 30);
             Connect(ticket.Ip, ticket.Port);
         }
         catch (Exception ex)
