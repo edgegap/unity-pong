@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
 
+env:
+  REGISTRY: ${{ secrets.REGISTRY }}
+  PROJECT: ${{ secrets.PROJECT }}
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
