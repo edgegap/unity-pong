@@ -20,5 +20,5 @@ jobs:
         run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/unity-pong:latest
       - name: Login to Edgegap Registry
         run: docker login $REGISTRY -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN
-      - name: Tagging
+      - name: Pushing to Edgegap Repository
         run: docker push $REGISTRY $REGISTRY/$PROJECT/unity-pong:latest 
