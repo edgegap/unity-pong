@@ -1,5 +1,4 @@
 FROM ubuntu:bionic
-MAINTAINER Edgegap <youremail@edgegap.com>
 ARG DEBIAN_FRONTEND=noninteractive
 ARG DOCKER_VERSION=17.06.0-ce
 RUN apt-get update && \
