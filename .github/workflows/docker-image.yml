@@ -9,6 +9,8 @@ env:
   PROJECT: ${{ secrets.PROJECT }}
   REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
   REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+  IMAGE_TAG: v1.0.0
+  IMAGE_NAME: unity-pong
 
 jobs:
   build:
@@ -17,8 +19,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the image
-        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/unity-pong:latest
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME
       - name: Login to Edgegap Registry
         run: docker login $REGISTRY -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN
-      - name: Pushing to Edgegap Repository
-        run: docker push $REGISTRY/$PROJECT/unity-pong:latest 
+      - name: Tagging the image to desired version
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME:$IMAGE_TAG
+      - name: Pushing to Edgegap Registry
+        run: docker push $REGISTRY/$PROJECT/$IMAGE_NAME:$IMAGE_TAG
+      - name: Tagging the image to latest
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME:latest
+      - name: Pushing latest to Edgegap Registry
+        run: docker push $REGISTRY/$PROJECT/$IMAGE_NAME:latest
