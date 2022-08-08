@@ -2,7 +2,7 @@ name: Build image and push to Edgegap Registry
 
 on:
   push:
-    branches: [main]
+    branches: [test-pipeline]
 
 env:
   REGISTRY: ${{ secrets.REGISTRY }}
