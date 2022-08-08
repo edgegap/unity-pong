@@ -10,5 +10,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag unity-pong:latest
+      - name: Build the image
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/unity-pong:latest
+      - name: Login to Edgegap Registry
+        run: docker login $REGISTRY -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN
+      - name: Tagging
+        run: docker push $REGISTRY $REGISTRY/$PROJECT/unity-pong:latest 
