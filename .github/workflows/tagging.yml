@@ -6,6 +6,7 @@ on:
 
 env:
   IMAGE_TAG: v1.0.0
+  VERSION_FILE: VERSION
 
 jobs:
   build:
@@ -13,8 +14,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Read VERSION file
+        id: current_version
+        run: echo "::set-output name=version::$(cat $VERSION_FILE)"
+
+      - name: Bump version
+        id: bump_version
+        uses: christian-draeger/increment-semantic-version@1.0.2
+        with:
+          current-version: ${{ steps.current_version.outputs.version }}
+          version-fragment: "feature"
+
+      - name: Do something with your bumped release version
+        run: cat ${{ steps.bump_version.outputs.next-version }} > $VERSION_FILE
+
       - uses: avakar/tag-and-release@v1
         with:
-          tag_name: ${{ $IMAGE_TAG }}
+          tag_name: ${{ steps.bump_version.outputs.next-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push changes
+        uses: devops-infra/action-commit-push@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_message: Bumped new Version
