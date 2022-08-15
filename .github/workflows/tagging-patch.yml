@@ -2,7 +2,7 @@ name: Tagging version
 
 on:
   push:
-    branches: [feature-1]
+    branches: [develop]
 
 env:
   VERSION_FILE: VERSION
