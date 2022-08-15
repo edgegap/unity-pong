@@ -5,8 +5,8 @@ on:
     branches: [develop]
 
 env:
-  IMAGE_TAG: v1.0.0
   VERSION_FILE: VERSION
+  VERSION_FRAGMENT: bug
 
 jobs:
   build:
@@ -24,9 +24,9 @@ jobs:
         uses: christian-draeger/increment-semantic-version@1.0.2
         with:
           current-version: ${{ steps.current_version.outputs.version }}
-          version-fragment: "bug"
+          version-fragment: "${{ VERSION_FRAGMENT }}"
 
-      - name: Updating $VERSION_FILE version
+      - name: Updating version file content
         run: echo ${{ steps.bump_version.outputs.next-version }} > $VERSION_FILE
 
       - uses: avakar/tag-and-release@v1
