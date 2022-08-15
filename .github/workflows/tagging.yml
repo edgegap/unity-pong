@@ -27,7 +27,7 @@ jobs:
           version-fragment: "feature"
 
       - name: Do something with your bumped release version
-        run: cat ${{ steps.bump_version.outputs.next-version }} > $VERSION_FILE
+        run: echo ${{ steps.bump_version.outputs.next-version }} > $VERSION_FILE
 
       - uses: avakar/tag-and-release@v1
         with:
