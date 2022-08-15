@@ -6,7 +6,7 @@ on:
 
 env:
   VERSION_FILE: VERSION
-  VERSION_FRAGMENT: minor
+  VERSION_FRAGMENT: bug
 
 jobs:
   build:
