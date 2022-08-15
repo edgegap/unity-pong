@@ -2,7 +2,7 @@ name: Tagging version
 
 on:
   push:
-    branches: [develop]
+    branches: [feature-1]
 
 env:
   IMAGE_TAG: v1.0.0
