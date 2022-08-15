@@ -13,8 +13,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Bump version
+        id: bump_version
+        uses: christian-draeger/increment-semantic-version@1.0.2
+        with:
+          current-version: '2.11.7-alpha3'
+          version-fragment: 'feature'
+
+      - name: Do something with your bumped release version
+        run: echo ${{ steps.bump_version.outputs.next-version }} > version.txt
+
       - uses: avakar/tag-and-release@v1
         with:
-          tag_name: ${{ env.IMAGE_TAG }}
+          tag_name: ${{ steps.bump_version.outputs.next-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
