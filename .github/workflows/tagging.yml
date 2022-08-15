@@ -15,6 +15,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: avakar/tag-and-release@v1
         with:
-          tag_name: ${{ $IMAGE_TAG }}
+          tag_name: ${{ env.IMAGE_TAG }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
