@@ -14,12 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Get Current version
+        id: current_version
+        run: cat version.txt
+
       - name: Bump version
         id: bump_version
         uses: christian-draeger/increment-semantic-version@1.0.2
         with:
-          current-version: '2.11.7-alpha3'
-          version-fragment: 'feature'
+          current-version: ${{steps.current_version.outputs}}'
+          version-fragment: "feature"
 
       - name: Do something with your bumped release version
         run: echo ${{ steps.bump_version.outputs.next-version }} > version.txt
