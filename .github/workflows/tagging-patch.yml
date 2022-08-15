@@ -24,7 +24,7 @@ jobs:
         uses: christian-draeger/increment-semantic-version@1.0.2
         with:
           current-version: ${{ steps.current_version.outputs.version }}
-          version-fragment: "$VERSION_FRAGMENT"
+          version-fragment: '$VERSION_FRAGMENT'
 
       - name: Updating version file content
         run: echo ${{ steps.bump_version.outputs.next-version }} > $VERSION_FILE
