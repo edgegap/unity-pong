@@ -13,5 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Tagging version
-        run: git tag $IMAGE_TAG
+      - uses: avakar/tag-and-release@v1
+        with:
+          tag_name: $IMAGE_TAG
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
