@@ -1,15 +1,20 @@
-name: Patch Tagging version
+name: Tagging to Patch, building image and pushing to registry
 
 on:
   push:
     branches: [develop]
 
 env:
+  REGISTRY: ${{ secrets.REGISTRY }}
+  PROJECT: ${{ secrets.PROJECT }}
+  REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+  REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+  IMAGE_NAME: unity-pong
   VERSION_FILE: VERSION
   VERSION_FRAGMENT: bug
 
 jobs:
-  build:
+  tagging:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,3 +45,37 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           commit_message: Bumped new Version
+
+  building-and-pushing-image:
+    needs: tagging
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: develop
+
+      - name: Get current version
+        id: current_version
+        run: echo "::set-output name=version::$(cat $VERSION_FILE)"
+
+      - name: Print current version
+        run: cat $VERSION_FILE
+
+      - name: Build the image
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME
+
+      - name: Login to Edgegap Registry
+        run: docker login $REGISTRY -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN
+
+      - name: Tagging the image to desired version
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME:${{ steps.current_version.outputs.version }}
+
+      - name: Pushing to Edgegap Registry
+        run: docker push $REGISTRY/$PROJECT/$IMAGE_NAME:${{ steps.current_version.outputs.version }}
+
+      - name: Tagging the image to latest
+        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME:latest
+
+      - name: Pushing latest to Edgegap Registry
+        run: docker push $REGISTRY/$PROJECT/$IMAGE_NAME:latest
