@@ -1,12 +1,12 @@
-name: Patch Tagging version
+name: Minor Tagging version
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 env:
   VERSION_FILE: VERSION
-  VERSION_FRAGMENT: bug
+  VERSION_FRAGMENT: feature
 
 jobs:
   build:
