@@ -1,4 +1,4 @@
-name: Tagging and pushing version
+name: Tagging to Patch, building image and pushing to registry
 
 on:
   push:
