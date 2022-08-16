@@ -52,10 +52,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: develop
 
       - name: Get current version
         id: current_version
         run: echo "::set-output name=version::$(cat $VERSION_FILE)"
+
+      - name: Print current version
+        run: cat $VERSION_FILE
 
       - name: Build the image
         run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME
