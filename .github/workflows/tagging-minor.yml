@@ -1,4 +1,4 @@
-name: Tagging and pushing version
+name: Increment MINOR version, building image and pushing to the registry
 
 on:
   push:
