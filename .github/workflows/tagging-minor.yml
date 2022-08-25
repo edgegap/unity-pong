@@ -1,4 +1,4 @@
-name: Tagging and pushing version
+name: Increment MINOR version, building image and pushing to the registry
 
 on:
   push:
@@ -52,10 +52,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: develop
 
       - name: Get current version
         id: current_version
         run: echo "::set-output name=version::$(cat $VERSION_FILE)"
+
+      - name: Print current version
+        run: cat $VERSION_FILE
 
       - name: Build the image
         run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME
@@ -64,13 +69,13 @@ jobs:
         run: docker login $REGISTRY -u $REGISTRY_USERNAME -p $REGISTRY_TOKEN
 
       - name: Tagging the image to desired version
-        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME:${{ steps.current_version.outputs.version }}
+        run: docker tag $REGISTRY/$PROJECT/$IMAGE_NAME $REGISTRY/$PROJECT/$IMAGE_NAME:${{ steps.current_version.outputs.version }}
 
       - name: Pushing to Edgegap Registry
         run: docker push $REGISTRY/$PROJECT/$IMAGE_NAME:${{ steps.current_version.outputs.version }}
 
       - name: Tagging the image to latest
-        run: docker build . --file Dockerfile --tag $REGISTRY/$PROJECT/$IMAGE_NAME:latest
+        run: docker tag $REGISTRY/$PROJECT/$IMAGE_NAME $REGISTRY/$PROJECT/$IMAGE_NAME:latest
 
       - name: Pushing latest to Edgegap Registry
         run: docker push $REGISTRY/$PROJECT/$IMAGE_NAME:latest
